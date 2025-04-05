@@ -22,7 +22,16 @@ export default function LoginPage() {
   
   const handleLogin = () => {
     try {
-      window.location.href = getAuthUrl();
+      // Log the authentication details for debugging
+      console.log('Starting Google OAuth authentication');
+      console.log('Redirect URI:', getAuthUrl().split('redirect_uri=')[1]?.split('&')[0]);
+      
+      // Use a more reliable approach to redirect
+      const authUrl = getAuthUrl();
+      console.log('Auth URL:', authUrl);
+      
+      // Redirect to Google auth
+      window.location.href = authUrl;
     } catch (error) {
       console.error('Login error:', error);
       setLoginError('Failed to redirect to login page');
@@ -100,6 +109,10 @@ export default function LoginPage() {
             
             <p className="mt-6 text-center text-sm text-gray-400">
               This is a demo application. All emails and account data are stored in your Google account.
+            </p>
+            
+            <p className="mt-2 text-center text-xs text-gray-500">
+              Your Magic Wallet will be automatically linked to your Gmail account for seamless authentication.
             </p>
           </div>
         </div>
