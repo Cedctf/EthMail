@@ -272,75 +272,6 @@ export function ComposeEmail({ open, onOpenChange }: ComposeEmailProps) {
     return Object.keys(newErrors).length === 0
   }
   
-  // Send 0.01 CELO to the contract
-  const sendPaymentToContract = async () => {
-    try {
-      const { ethereum } = window as any;
-      if (!ethereum) {
-        throw new Error("Metamask is not installed");
-      }
-      
-      const provider = new ethers.BrowserProvider(ethereum);
-      const signer = await provider.getSigner();
-      
-      // Contract address from your query
-      const contractAddress = "0x527482F7b3C9AA34A2B7d69646Bac38Dc4455dEf";
-      const receiverAddress = "0x8fdd8FF672BEf99e33A1F821ECDC57571391e9B5";
-      
-      // Create contract instance
-      const contract = new ethers.Contract(contractAddress, contractABI, signer);
-      
-      // Convert 0.01 CELO to wei (1e16 wei = 0.01 ether)
-      const amountInWei = ethers.parseEther("0.01");
-      
-      // Prepare transaction options with manual gas settings
-      const txOptions = {
-        value: amountInWei,
-        gasLimit: 200000 // Manually set gas limit to avoid estimation errors
-      };
-      
-      console.log("Sending transaction with options:", txOptions);
-      
-      try {
-        // Call the depositPayment function with the receiver address and value
-        const tx = await contract.depositPayment(receiverAddress, txOptions);
-        
-        console.log("Transaction hash:", tx.hash);
-        
-        // Wait for the transaction to be mined
-        const receipt = await tx.wait();
-        
-        console.log("Transaction confirmed in block:", receipt.blockNumber);
-        console.log("Gas used:", receipt.gasUsed.toString());
-        
-        return true;
-      } catch (txError) {
-        console.error("Transaction failed:", txError);
-        
-        // Check if it's a user rejection
-        if ((txError as any).code === 4001) {
-          throw new Error("Transaction rejected by user");
-        }
-        
-        // Try with higher gas limit if first attempt failed
-        console.log("Retrying with higher gas limit...");
-        txOptions.gasLimit = 500000;
-        
-        try {
-          const tx = await contract.depositPayment(receiverAddress, txOptions);
-          await tx.wait();
-          return true;
-        } catch (retryError) {
-          console.error("Retry failed:", retryError);
-          throw new Error("Transaction failed after retry");
-        }
-      }
-    } catch (error) {
-      console.error("Error sending payment:", error);
-      throw error;
-    }
-  };
-  
   const handleSend = async () => {
     if (!validateForm()) {
       return;
@@ -364,11 +295,22 @@ export function ComposeEmail({ open, onOpenChange }: ComposeEmailProps) {
       
       // Try to send payment to contract
       let paymentSent = false;
+      let transactionHash = '';
       try {
         // Send 0.01 CELO payment to the contract
-        paymentSent = await sendPaymentToContract();
-        // Add payment info to email body
+        const txResult = await sendPaymentToContract();
+        paymentSent = txResult.success;
+        transactionHash = txResult.hash || '';
+        
+        // Add payment info with transaction hash to email body
         emailBody += "\n\n---\n🔄 Payment of 0.01 CELO has been sent via contract.";
+        if (transactionHash) {
+          // Add Celo explorer link for the transaction
+          const celoExplorerUrl = `https://explorer.celo.org/mainnet/tx/${transactionHash}`;
+          emailBody += `\nTransaction Hash: ${transactionHash}`;
+          emailBody += `\nView on Explorer: ${celoExplorerUrl}`;
+          emailBody += `\nReceiver Address: 0x8fdd8FF672BEf99e33A1F821ECDC57571391e9B5`;
+        }
       } catch (paymentError) {
         console.error("Payment failed:", paymentError);
         emailBody += "\n\n---\n❌ Payment of 0.01 CELO failed to process.";
@@ -384,6 +326,9 @@ export function ComposeEmail({ open, onOpenChange }: ComposeEmailProps) {
       }
       if (paymentSent) {
         successMsg += " Payment of 0.01 CELO sent.";
+        if (transactionHash) {
+          successMsg += ` TX: ${transactionHash.substring(0, 10)}...`;
+        }
       }
       
       setStatusMessage({
@@ -495,6 +440,75 @@ export function ComposeEmail({ open, onOpenChange }: ComposeEmailProps) {
     setShowPaymentForm(false)
   }
 
+  // Send 0.01 CELO to the contract
+  const sendPaymentToContract = async () => {
+    try {
+      const { ethereum } = window as any;
+      if (!ethereum) {
+        throw new Error("Metamask is not installed");
+      }
+      
+      const provider = new ethers.BrowserProvider(ethereum);
+      const signer = await provider.getSigner();
+      
+      // Contract address from your query
+      const contractAddress = "0x527482F7b3C9AA34A2B7d69646Bac38Dc4455dEf";
+      const receiverAddress = "0x8fdd8FF672BEf99e33A1F821ECDC57571391e9B5";
+      
+      // Create contract instance
+      const contract = new ethers.Contract(contractAddress, contractABI, signer);
+      
+      // Convert 0.01 CELO to wei (1e16 wei = 0.01 ether)
+      const amountInWei = ethers.parseEther("0.01");
+      
+      // Prepare transaction options with manual gas settings
+      const txOptions = {
+        value: amountInWei,
+        gasLimit: 200000 // Manually set gas limit to avoid estimation errors
+      };
+      
+      console.log("Sending transaction with options:", txOptions);
+      
+      try {
+        // Call the depositPayment function with the receiver address and value
+        const tx = await contract.depositPayment(receiverAddress, txOptions);
+        
+        console.log("Transaction hash:", tx.hash);
+        
+        // Wait for the transaction to be mined
+        const receipt = await tx.wait();
+        
+        console.log("Transaction confirmed in block:", receipt.blockNumber);
+        console.log("Gas used:", receipt.gasUsed.toString());
+        
+        return { success: true, hash: tx.hash };
+      } catch (txError) {
+        console.error("Transaction failed:", txError);
+        
+        // Check if it's a user rejection
+        if ((txError as any).code === 4001) {
+          throw new Error("Transaction rejected by user");
+        }
+        
+        // Try with higher gas limit if first attempt failed
+        console.log("Retrying with higher gas limit...");
+        txOptions.gasLimit = 500000;
+        
+        try {
+          const tx = await contract.depositPayment(receiverAddress, txOptions);
+          await tx.wait();
+          return { success: true, hash: tx.hash };
+        } catch (retryError) {
+          console.error("Retry failed:", retryError);
+          throw new Error("Transaction failed after retry");
+        }
+      }
+    } catch (error) {
+      console.error("Error sending payment:", error);
+      throw error;
+    }
+  };
+  
   return (
     <>
       <Sheet open={open} onOpenChange={(isOpen) => {
@@ -659,6 +673,8 @@ export function ComposeEmail({ open, onOpenChange }: ComposeEmailProps) {
                   </div>
                 </div>
               )}
+              
+
               
               <div className="flex items-center justify-between border-t border-gray-800 p-3">
                 <div className="flex items-center gap-2">
