@@ -1,103 +1,76 @@
-import Image from "next/image";
+"use client"
+
+import { useState } from 'react'
+import { MobileNav } from '@/components/mobile-nav'
+import EmailList from '@/components/email-list'
+import { Sidebar } from '@/components/sidebar'
+import { ComposeEmail } from '@/components/compose-email'
+import { useAuth } from '@/components/auth-provider'
+// import MagicWallet from '@/components/magic-wallet'
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const { isLoggedIn, loading } = useAuth()
+  const [isComposeOpen, setIsComposeOpen] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [currentCategory, setCurrentCategory] = useState<string>('inbox')
+  const [showMagicWallet, setShowMagicWallet] = useState(false)
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // If still loading auth state, show loading indicator
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    )
+  }
+
+  // Don't render main content until logged in (will be redirected by auth provider)
+  if (!isLoggedIn) {
+    return null
+  }
+
+  return (
+    <main className="flex h-screen flex-col bg-background">
+      <MobileNav />
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar 
+          onCompose={() => setIsComposeOpen(true)} 
+          unreadCount={unreadCount}
+          onCategoryChange={setCurrentCategory}
+          currentCategory={currentCategory}
+        />
+        <div className="flex-1 overflow-y-auto">
+          <EmailList 
+            category={currentCategory} 
+            onUnreadCountChange={setUnreadCount} 
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+      </div>
+      
+      <ComposeEmail open={isComposeOpen} onOpenChange={setIsComposeOpen} />
+      
+      {/* Magic Wallet Toggle Button */}
+      {/* <div className="fixed bottom-6 right-6 z-50">
+        {!showMagicWallet ? (
+          <button
+            onClick={() => setShowMagicWallet(true)}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full p-3 shadow-lg flex items-center justify-center"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-wallet"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 7v13a2 2 0 0 0 2 2h16v-4"></path><path d="M18 12h.01"></path></svg>
+          </button>
+        ) : (
+          <div className="relative">
+            <button
+              onClick={() => setShowMagicWallet(false)}
+              className="absolute -top-3 -right-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-full p-1 shadow-lg z-10"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+            </button>
+            <MagicWallet />
+          </div>
+        )}
+      </div> */}
+    </main>
+  )
 }
+
