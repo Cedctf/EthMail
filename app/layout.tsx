@@ -3,7 +3,6 @@
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { AuthProvider } from "@/components/auth-provider"
-import { PrivyProvider } from "../components/privy-provider"
 import { usePathname } from "next/navigation"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -22,9 +21,7 @@ export default function RootLayout({
         {isLandingPage ? (
           children
         ) : (
-          <PrivyProvider>
-            <AuthProvider>{children}</AuthProvider>
-          </PrivyProvider>
+          <AuthProvider>{children}</AuthProvider>
         )}
       </body>
     </html>
