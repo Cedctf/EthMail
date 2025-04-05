@@ -6,14 +6,14 @@ import EmailList from '@/components/email-list'
 import { Sidebar } from '@/components/sidebar'
 import { ComposeEmail } from '@/components/compose-email'
 import { useAuth } from '@/components/auth-provider'
-// import MagicWallet from '@/components/magic-wallet'
+import PrivyWallet from '@/components/privy-wallet'
 
 export default function Home() {
   const { isLoggedIn, loading } = useAuth()
   const [isComposeOpen, setIsComposeOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
   const [currentCategory, setCurrentCategory] = useState<string>('inbox')
-  const [showMagicWallet, setShowMagicWallet] = useState(false)
+  const [showWallet, setShowWallet] = useState(false)
 
   // If still loading auth state, show loading indicator
   if (loading) {
@@ -49,11 +49,11 @@ export default function Home() {
       
       <ComposeEmail open={isComposeOpen} onOpenChange={setIsComposeOpen} />
       
-      {/* Magic Wallet Toggle Button */}
-      {/* <div className="fixed bottom-6 right-6 z-50">
-        {!showMagicWallet ? (
+      {/* Privy Wallet Toggle Button */}
+      <div className="fixed bottom-6 right-6 z-50">
+        {!showWallet ? (
           <button
-            onClick={() => setShowMagicWallet(true)}
+            onClick={() => setShowWallet(true)}
             className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full p-3 shadow-lg flex items-center justify-center"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-wallet"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 7v13a2 2 0 0 0 2 2h16v-4"></path><path d="M18 12h.01"></path></svg>
@@ -61,15 +61,15 @@ export default function Home() {
         ) : (
           <div className="relative">
             <button
-              onClick={() => setShowMagicWallet(false)}
+              onClick={() => setShowWallet(false)}
               className="absolute -top-3 -right-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-full p-1 shadow-lg z-10"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
             </button>
-            <MagicWallet />
+            <PrivyWallet />
           </div>
         )}
-      </div> */}
+      </div>
     </main>
   )
 }
