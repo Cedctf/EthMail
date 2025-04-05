@@ -21,7 +21,7 @@ export default function RootLayout({
         {isLandingPage ? (
           children
         ) : (
-          <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>{children}</AuthProvider>
         )}
       </body>
     </html>

@@ -20,21 +20,11 @@ export function clearAuthData() {
 
 /**
  * Sets up event listeners to clear auth data when the tab is closed
+ * (Now intentionally empty to avoid clearing sessions)
  */
 export function setupSessionCleanup() {
-  if (typeof window !== 'undefined') {
-    // Clear auth data when the tab is closed
-    window.addEventListener('beforeunload', () => {
-      clearAuthData()
-    })
-    
-    // Also clear auth data when the page is hidden (tab switch)
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') {
-        clearAuthData()
-      }
-    })
-  }
+  // Removed code that was clearing sessions on tab close/hide
+  // This allows sessions to persist between visits
 }
 
 /**

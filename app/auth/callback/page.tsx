@@ -13,8 +13,8 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // Clear any existing auth data before processing the callback
-        clearAuthData();
+        // Don't clear existing auth data before processing the callback
+        // This allows maintaining login sessions
         
         // Log the URL for debugging
         console.log('Callback URL:', window.location.href);

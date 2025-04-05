@@ -11,8 +11,8 @@ export default function LoginPage() {
   const [loginError, setLoginError] = useState('');
   
   useEffect(() => {
-    // Clear any existing auth data when landing on the login page
-    clearAuthData();
+    // Don't clear auth data when landing on login page anymore
+    // This allows sessions to persist
     
     // If already authenticated, redirect to root page
     if (isAuthenticated()) {
