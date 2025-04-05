@@ -61,6 +61,41 @@ export function MobileSidebar() {
           </Link>
         </Button>
       </nav>
+      <div className="mt-6 px-3">
+        <h3 className="mb-2 px-4 text-xs font-semibold">Labels</h3>
+        <div className="grid gap-1">
+          <Button variant="ghost" className="justify-start gap-3 px-3" asChild>
+            <Link href="/personal">
+              <span className="h-2 w-2 rounded-full bg-blue-500" />
+              <span>Personal</span>
+            </Link>
+          </Button>
+          <Button variant="ghost" className="justify-start gap-3 px-3" asChild>
+            <Link href="/work">
+              <span className="h-2 w-2 rounded-full bg-green-500" />
+              <span>Work</span>
+            </Link>
+          </Button>
+          <Button variant="ghost" className="justify-start gap-3 px-3" asChild>
+            <Link href="/finance">
+              <span className="h-2 w-2 rounded-full bg-yellow-500" />
+              <span>Finance</span>
+            </Link>
+          </Button>
+          <Button variant="ghost" className="justify-start gap-3 px-3" asChild>
+            <Link href="/social">
+              <span className="h-2 w-2 rounded-full bg-purple-500" />
+              <span>Social</span>
+            </Link>
+          </Button>
+          <Button variant="ghost" className="justify-start gap-3 px-3" asChild>
+            <Link href="/manage-labels">
+              <ChevronRight className="h-4 w-4" />
+              <span>Manage labels</span>
+            </Link>
+          </Button>
+        </div>
+      </div>
     </ScrollArea>
   )
 }
